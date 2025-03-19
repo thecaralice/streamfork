@@ -1,0 +1,13 @@
+[project]
+name = "streamfork"
+version = "0.1.0"
+readme = "README.md"
+authors = [
+	{ name = "Alice Carroll", email = "pypi@alice-carroll.pet" },
+]
+requires-python = ">=3.12"
+dependencies = [  ]
+
+[build-system]
+requires = [ "hatchling" ]
+build-backend = "hatchling.build"

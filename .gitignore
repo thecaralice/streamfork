@@ -1,0 +1,5 @@
+.python-version
+.venv/
+# Libraries shouldn't have lockfiles
+uv.lock
+__pycache__/
