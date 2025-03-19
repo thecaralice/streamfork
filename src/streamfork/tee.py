@@ -15,8 +15,9 @@ def tee(*streams: IO[str], capture_stderr: bool = True) -> Generator[Input, None
 	out = Fork(sys.stdout, *streams)
 	err = Fork(sys.stderr, *streams)
 	with (
+		out,
+		err,
 		redirect_stdout(out),
 		redirect_stderr(err) if capture_stderr else nullcontext(),
 	):
 		yield out.input
-	...

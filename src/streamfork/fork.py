@@ -8,6 +8,7 @@ from typing import Literal, Never, IO, final, override
 class Fork(TextIOBase):
 	_main_stream: IO[str]
 	_other_streams: tuple[IO[str], ...]
+	_closed: bool = False
 
 	def __init__(self, main_stream: IO[str], /, *other_streams: IO[str]) -> None:
 		self._main_stream = main_stream
@@ -57,16 +58,22 @@ class Fork(TextIOBase):
 
 	@override
 	def close(self) -> None:
-		for x in self._streams:
-			x.close()
+		self.flush()
+		self._closed = True
+
+	def _assert_open(self) -> None:
+		if self._closed:
+			raise ValueError(f"{self} is closed")
 
 	@override
 	def flush(self) -> None:
+		self._assert_open()
 		for x in self._streams:
 			x.flush()
 
 	@override
 	def write(self, s: str, /) -> int:
+		self._assert_open()
 		res = self._main_stream.write(s)
 		for x in self._other_streams:
 			_ = x.write(s)
@@ -74,6 +81,7 @@ class Fork(TextIOBase):
 
 	@override
 	def truncate(self, size: int | None = None, /) -> int:
+		self._assert_open()
 		res = self._main_stream.truncate(size)
 		for x in self._other_streams:
 			_ = x.truncate(size)
@@ -82,7 +90,7 @@ class Fork(TextIOBase):
 	@property
 	@override
 	def closed(self) -> bool:
-		return any(x.closed for x in self._streams)
+		return self._closed or any(x.closed for x in self._streams)
 
 	@override
 	def tell(self) -> int:
